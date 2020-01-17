@@ -5,7 +5,7 @@
 
 ## 直线
 
-![Line](./Images/Line.bmp)
+![Line](./Images/Line.jpg)
 
 操作：
 
@@ -16,7 +16,7 @@
 
 ## 圆
 
-![Circle](./Images/Circle.bmp)
+![Circle](./Images/Circle.jpg)
 
 操作：
 
@@ -25,7 +25,7 @@
 
 ## 圆（填充）
 
-![FillCircle](./Images/FillCircle.bmp)
+![FillCircle](./Images/FillCircle.jpg)
 
 操作：
 
