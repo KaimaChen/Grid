@@ -1,6 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+public enum LineAlgorithm
+{
+    Bresenhams,
+    Lerp,
+    WalkGrid,
+    Supercover
+}
+
 /// <summary>
 /// 绘制直线
 /// * 鼠标左键：直线起点
@@ -11,6 +19,8 @@ public class LineGrid : BaseGrid
     public Material m_startMat;
     public Material m_endMat;
     public Material m_lineMat;
+
+    public LineAlgorithm m_algorithm;
 
     Vector2Int m_start;
     Vector2Int m_end;
@@ -29,16 +39,31 @@ public class LineGrid : BaseGrid
             m_end = GetMouseTilePos();
     }
 
+    private List<Vector2Int> GetLinePoints()
+    {
+        switch(m_algorithm)
+        {
+            case LineAlgorithm.Bresenhams:
+                return LineByBresenhams(m_start, m_end);
+            case LineAlgorithm.Lerp:
+                return LineByLerp(m_start, m_end);
+            case LineAlgorithm.WalkGrid:
+                return LineByWalkGrid(m_start, m_end);
+            case LineAlgorithm.Supercover:
+                return LineBySupercover(m_start, m_end);
+            default:
+                Debug.LogError($"No LineAlgorithm={m_algorithm}");
+                return LineBySupercover(m_start, m_end);
+        }
+    }
+
     protected override void Draw()
     {
         base.Draw();
 
         GL.Begin(GL.QUADS);
         m_lineMat.SetPass(0);
-        //List<Vector2Int> points = Line_Bresenhams(m_start, m_end);
-        //List<Vector2Int> points = LineByLerp(m_start, m_end);
-        //List<Vector2Int> points = LineByWalkGrid(m_start, m_end);
-        List<Vector2Int> points = LineBySupercover(m_start, m_end);
+        List<Vector2Int> points = GetLinePoints();
         for (int i = 0; i < points.Count; i++)
             DrawQuad(points[i]);
         GL.End();
@@ -61,7 +86,7 @@ public class LineGrid : BaseGrid
     }
 
     /// <summary>
-    /// 利用bresenhams直线算法找到两点间的所有格子
+    /// Bresenhams
     /// </summary>
     /// <param name="start">直线起点</param>
     /// <param name="end">直线终点</param>
@@ -113,7 +138,7 @@ public class LineGrid : BaseGrid
     }
 
     /// <summary>
-    /// 利用插值生成直线 
+    /// 利用插值生成直线 （和DDA算法类似）
     /// 参考 https://www.redblobgames.com/grids/line-drawing.html
     /// </summary>
     public static List<Vector2Int> LineByLerp(Vector2Int start, Vector2Int end)

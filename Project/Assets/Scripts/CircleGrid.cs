@@ -1,96 +1,162 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+public enum CircleAlgorithm
+{
+    Simple,
+    BresenhamFloat,
+    BresenhamInt,
+}
+
 /// <summary>
-/// 绘制圆
+/// 圆（不填充）
 /// * 鼠标左键：圆心位置
 /// * 鼠标右键：控制半径
 /// </summary>
-public class CircleGrid : BaseGrid
+public class CircleGrid : BaseCircleGrid
 {
-    [Range(0, 1)]
-    public float m_radius = 0.3f;
-    public Material m_circleMat;
+    public CircleAlgorithm m_algorithm;
 
-    Vector2Int m_center;
-
-    void Start()
+    protected override List<Vector2Int> GetCirclePoints()
     {
-        m_center = new Vector2Int(m_widthCount / 2, m_heightCount / 2);
-    }
+        //半径占的格子数
+        int radiusCount = Mathf.CeilToInt(m_radius / TileWidth);
 
-    void Update()
-    {
-        if (Input.GetMouseButton(0))
+        switch(m_algorithm)
         {
-            m_center = GetMouseTilePos();
+            case CircleAlgorithm.Simple:
+                return CircleBySimple(m_center, radiusCount);
+            case CircleAlgorithm.BresenhamFloat:
+                return CircleByBresenhamFloat(m_center, radiusCount);
+            case CircleAlgorithm.BresenhamInt:
+                return CircleByBresenhamInt(m_center, radiusCount);
+            default:
+                Debug.LogError($"No CircleAlgorithm={m_algorithm}");
+                return CircleBySimple(m_center, radiusCount);
         }
-        else if(Input.GetMouseButton(1))
-        {
-            float cx = (float)m_center.x / m_widthCount;
-            float mx = Input.mousePosition.x / Screen.width;
-            m_radius = Mathf.Abs(mx - cx);
-        }
-    }
-
-    protected override void Draw()
-    {
-        base.Draw();
-
-        GL.Begin(GL.QUADS);
-        m_circleMat.SetPass(0);
-        //List<Vector2Int> points = CircleByBoundingBox(m_center, m_radius, TileWidth);
-        List<Vector2Int> points = CircleByBoundingCircle(m_center, m_radius, TileWidth);
-        for (int i = 0; i < points.Count; i++)
-            DrawQuad(points[i]);
-        GL.End();
     }
 
     /// <summary>
-    /// 算出圆所在的包围盒，然后算出遍历里面的点看哪些在半径里
+    /// 利用对称性
+    /// 参考 http://www.sunshine2k.de/coding/java/Bresenham/RasterisingLinesCircles.pdf
     /// </summary>
-    /// <param name="centerTile">圆心的格子坐标（实际坐标指格子左下角）</param>
-    public static List<Vector2Int> CircleByBoundingBox(Vector2Int centerTile, float radius, float tileSize)
+    public static List<Vector2Int> CircleBySimple(Vector2Int c, int r)
     {
-        List<Vector2Int> result = new List<Vector2Int>();
-
-        int radiusCount = Mathf.CeilToInt(radius / tileSize);
-        float sqrRadius = radius * radius;
-        for(int dx = -radiusCount; dx <= radiusCount; dx++)
+        List<Vector2Int> result = new List<Vector2Int>()
         {
-            for(int dy = -radiusCount; dy <= radiusCount; dy++)
-            {
-                Vector2 relativePos = new Vector2(dx * tileSize, dy * tileSize);
-                float sqrDistance = relativePos.sqrMagnitude;
-                if (sqrDistance <= sqrRadius)
-                    result.Add(centerTile + new Vector2Int(dx, dy));
-            }
+            new Vector2Int(c.x, c.y + r),
+            new Vector2Int(c.x, c.y - r),
+            new Vector2Int(c.x + r, c.y),
+            new Vector2Int(c.x - r, c.y)
+        };
+
+        int sqr = r * r;
+        int x = 1;
+        int y = Mathf.RoundToInt(Mathf.Sqrt(sqr - x * x));
+        while(x <= y)
+        {
+            result.Add(new Vector2Int(c.x + x, c.y + y));
+            result.Add(new Vector2Int(c.x + x, c.y - y));
+            result.Add(new Vector2Int(c.x - x, c.y + y));
+            result.Add(new Vector2Int(c.x - x, c.y - y));
+
+            result.Add(new Vector2Int(c.x + y, c.y + x));
+            result.Add(new Vector2Int(c.x + y, c.y - x));
+            result.Add(new Vector2Int(c.x - y, c.y + x));
+            result.Add(new Vector2Int(c.x - y, c.y - x));
+
+            x += 1;
+            y = Mathf.RoundToInt(Mathf.Sqrt(sqr - x * x));
         }
 
         return result;
     }
 
     /// <summary>
-    /// 利用勾股定理来算出左右两端的x值
-    /// 参考 https://www.redblobgames.com/grids/circle-drawing/
+    /// Bresenham（带浮点运算）
+    /// 参考 http://www.sunshine2k.de/coding/java/Bresenham/RasterisingLinesCircles.pdf
     /// </summary>
-    public static List<Vector2Int> CircleByBoundingCircle(Vector2Int centerTile, float radius, float tileSize)
+    public static List<Vector2Int> CircleByBresenhamFloat(Vector2Int c, int r)
     {
-        List<Vector2Int> result = new List<Vector2Int>();
-
-        int radiusCount = Mathf.CeilToInt(radius / tileSize);
-        int sqr = radiusCount * radiusCount;
-        int top = centerTile.y + radiusCount;
-        int bottom = centerTile.y - radiusCount;
-
-        for(int y = bottom; y <= top; y++)
+        List<Vector2Int> result = new List<Vector2Int>()
         {
-            int dy = y - centerTile.y;
-            int dx = Mathf.FloorToInt(Mathf.Sqrt(sqr - dy * dy));
-            int left = centerTile.x - dx;
-            int right = centerTile.x + dx;
-            for (int x = left; x <= right; x++)
-                result.Add(new Vector2Int(x, y));
+            new Vector2Int(c.x, c.y + r),
+            new Vector2Int(c.x, c.y - r),
+            new Vector2Int(c.x + r, c.y),
+            new Vector2Int(c.x - r, c.y)
+        };
+
+        int x = 0;
+        int y = r;
+        float d = 1.25f - r;
+        while(x < y)
+        {
+            if(d < 0)
+            {
+                d = d + 2 * x + 3;
+                x += 1;
+            }
+            else
+            {
+                d = d + 2 * (x - y) + 5;
+                x += 1;
+                y -= 1;
+            }
+
+            result.Add(new Vector2Int(c.x + x, c.y + y));
+            result.Add(new Vector2Int(c.x + x, c.y - y));
+            result.Add(new Vector2Int(c.x - x, c.y + y));
+            result.Add(new Vector2Int(c.x - x, c.y - y));
+
+            result.Add(new Vector2Int(c.x + y, c.y + x));
+            result.Add(new Vector2Int(c.x + y, c.y - x));
+            result.Add(new Vector2Int(c.x - y, c.y + x));
+            result.Add(new Vector2Int(c.x - y, c.y - x));
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Bresenham（不带浮点运算）
+    /// 参考 http://www.sunshine2k.de/coding/java/Bresenham/RasterisingLinesCircles.pdf
+    /// </summary>
+    public static List<Vector2Int> CircleByBresenhamInt(Vector2Int c, int r)
+    {
+        List<Vector2Int> result = new List<Vector2Int>()
+        {
+            new Vector2Int(c.x, c.y + r),
+            new Vector2Int(c.x, c.y - r),
+            new Vector2Int(c.x + r, c.y),
+            new Vector2Int(c.x - r, c.y)
+        };
+
+        int x = 0;
+        int y = r;
+        int d = 1 - r; //这里去掉了浮点
+        while (x < y)
+        {
+            if (d < 0)
+            {
+                d = d + 2 * x + 3;
+                x += 1;
+            }
+            else
+            {
+                d = d + 2 * (x - y) + 5;
+                x += 1;
+                y -= 1;
+            }
+
+            result.Add(new Vector2Int(c.x + x, c.y + y));
+            result.Add(new Vector2Int(c.x + x, c.y - y));
+            result.Add(new Vector2Int(c.x - x, c.y + y));
+            result.Add(new Vector2Int(c.x - x, c.y - y));
+
+            result.Add(new Vector2Int(c.x + y, c.y + x));
+            result.Add(new Vector2Int(c.x + y, c.y - x));
+            result.Add(new Vector2Int(c.x - y, c.y + x));
+            result.Add(new Vector2Int(c.x - y, c.y - x));
         }
 
         return result;
