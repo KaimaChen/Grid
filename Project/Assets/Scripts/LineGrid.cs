@@ -109,28 +109,28 @@ public class LineGrid : BaseGrid
         {
             for (x = start.x; x != end.x; x += ux)
             {
+                result.Add(new Vector2Int(x, y));
+
                 eps += dy;
                 if ((eps << 1) >= dx)
                 {
                     y += uy;
                     eps -= dx;
                 }
-
-                result.Add(new Vector2Int(x, y));
             }
         }
         else
         {
             for (y = start.y; y != end.y; y += uy)
             {
+                result.Add(new Vector2Int(x, y));
+
                 eps += dx;
                 if ((eps << 1) >= dy)
                 {
                     x += ux;
                     eps -= dy;
                 }
-
-                result.Add(new Vector2Int(x, y));
             }
         }
 
