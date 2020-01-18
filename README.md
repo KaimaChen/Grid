@@ -3,6 +3,17 @@
 
 
 
+## 连通分量
+
+![ConnectedComponent](./Images/ConnectedComponent.jpg)
+
+操作：
+
+* 鼠标左键：添加障碍
+* 鼠标右键：移除障碍
+
+
+
 ## 直线
 
 ![Line](./Images/Line.jpg)
