@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 public abstract class BaseCircleGrid : BaseGrid
 {
+    readonly Color c_circleColor = new Color(1, 0.5f, 0.5f);
+
     [Range(0, 1)]
     public float m_radius = 0.3f;
-    public Material m_circleMat;
 
     protected Vector2Int m_center;
 
@@ -33,7 +34,7 @@ public abstract class BaseCircleGrid : BaseGrid
         base.Draw();
 
         GL.Begin(GL.QUADS);
-        m_circleMat.SetPass(0);
+        GL.Color(c_circleColor);
         List<Vector2Int> points = GetCirclePoints();
         for (int i = 0; i < points.Count; i++)
             DrawQuad(points[i]);

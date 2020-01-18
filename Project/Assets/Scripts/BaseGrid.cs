@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
-using System;
 
 public class BaseGrid : MonoBehaviour {
+    readonly Color c_gridColor = new Color(0.7f, 0.7f, 0.7f);
+
     public int m_widthCount = 10;
     public int m_heightCount = 10;
 
@@ -27,8 +28,10 @@ public class BaseGrid : MonoBehaviour {
     
     protected virtual void Draw()
     {
-        GL.Begin(GL.QUADS);
         m_mat.SetPass(0);
+
+        GL.Begin(GL.QUADS);
+        GL.Color(c_gridColor);
 
         DrawGrid();
 

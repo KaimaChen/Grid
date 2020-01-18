@@ -16,9 +16,9 @@ public enum LineAlgorithm
 /// </summary>
 public class LineGrid : BaseGrid
 {
-    public Material m_startMat;
-    public Material m_endMat;
-    public Material m_lineMat;
+    readonly Color c_startColor = new Color(1, 1, 0);
+    readonly Color c_endColor = new Color(0, 0, 1);
+    readonly Color c_lineColor = new Color(1, 0.5f, 0.5f);
 
     public LineAlgorithm m_algorithm;
 
@@ -62,19 +62,19 @@ public class LineGrid : BaseGrid
         base.Draw();
 
         GL.Begin(GL.QUADS);
-        m_lineMat.SetPass(0);
+        GL.Color(c_lineColor);
         List<Vector2Int> points = GetLinePoints();
         for (int i = 0; i < points.Count; i++)
             DrawQuad(points[i]);
         GL.End();
 
         GL.Begin(GL.QUADS);
-        m_startMat.SetPass(0);
+        GL.Color(c_startColor);
         DrawQuad(m_start);
         GL.End();
 
         GL.Begin(GL.QUADS);
-        m_endMat.SetPass(0);
+        GL.Color(c_endColor);
         DrawQuad(m_end);
         GL.End();
 
