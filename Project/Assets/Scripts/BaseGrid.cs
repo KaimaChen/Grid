@@ -9,7 +9,11 @@ public class BaseGrid : MonoBehaviour {
 
     protected float TileWidth { get { return 1.0f / m_widthCount; } }
 
+    protected float VisualWidth { get { return 0.9f / m_widthCount; } } //中间留一些格子间的间隔
+
     protected float TileHeight { get { return 1.0f / m_heightCount; } }
+
+    protected float VisualHeight { get { return 0.9f / m_heightCount; } }
 
     protected virtual void OnRenderObject()
     {
@@ -33,15 +37,17 @@ public class BaseGrid : MonoBehaviour {
 
     void DrawGrid()
     {
-        float w = 1.0f / m_widthCount;
-        float h = 1.0f / m_heightCount;
+        float w = TileWidth;
+        float vw = VisualWidth;
+        float h = TileHeight;
+        float vh = VisualHeight;
 
         for(int x = 0; x < m_widthCount; x++)
         {
             for(int y = 0; y < m_heightCount; y++)
             {
                 Vector2 pos = new Vector2(x * w, y * h);
-                Vector2 size = new Vector2(w * 0.9f, h * 0.9f);
+                Vector2 size = new Vector2(vw, vh);
                 DrawQuad(pos, size);
             }
         }
@@ -60,6 +66,12 @@ public class BaseGrid : MonoBehaviour {
         GL.Vertex3(pos.x, pos.y + size.y, 0);
         GL.Vertex3(pos.x + size.x, pos.y + size.y, 0);
         GL.Vertex3(pos.x + size.x, pos.y, 0);
+    }
+
+    protected bool IsValidTilePos(Vector2Int tilePos)
+    {
+        return tilePos.x >= 0 && tilePos.x < m_widthCount &&
+                    tilePos.y >= 0 && tilePos.y < m_heightCount;
     }
 
     protected Vector2Int GetMouseTilePos()
