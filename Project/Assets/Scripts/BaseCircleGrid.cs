@@ -35,9 +35,11 @@ public abstract class BaseCircleGrid : BaseGrid
 
         GL.Begin(GL.QUADS);
         GL.Color(c_circleColor);
+
         List<Vector2Int> points = GetCirclePoints();
         for (int i = 0; i < points.Count; i++)
             DrawQuad(points[i]);
+
         GL.End();
     }
 

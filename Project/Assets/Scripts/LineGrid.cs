@@ -66,20 +66,15 @@ public class LineGrid : BaseGrid
         List<Vector2Int> points = GetLinePoints();
         for (int i = 0; i < points.Count; i++)
             DrawQuad(points[i]);
-        GL.End();
 
-        GL.Begin(GL.QUADS);
         GL.Color(c_startColor);
         DrawQuad(m_start);
-        GL.End();
 
-        GL.Begin(GL.QUADS);
         GL.Color(c_endColor);
         DrawQuad(m_end);
         GL.End();
 
         GL.Begin(GL.LINES);
-        m_mat.SetPass(0);
         GL.Vertex3((m_start.x+0.5f) * TileWidth, (m_start.y+0.5f) * TileHeight, 0);
         GL.Vertex3((m_end.x+0.5f) * TileWidth, (m_end.y+0.5f) * TileHeight, 0);
         GL.End();

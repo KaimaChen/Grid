@@ -133,8 +133,6 @@ public class ConnectedComponentGrid : BaseGrid
 
     protected override void Draw()
     {
-        m_mat.SetPass(0);
-
         m_areaToColor.Clear();
 
         GL.Begin(GL.QUADS);
@@ -155,9 +153,8 @@ public class ConnectedComponentGrid : BaseGrid
         if (value == c_obstacle)
             return Color.black;
 
-        Color c;
         int areaId = m_unionFind.Find(value);
-        if (!m_areaToColor.TryGetValue(areaId, out c))
+        if (!m_areaToColor.TryGetValue(areaId, out Color c))
         {
             int index = m_areaToColor.Count;
             if (index < m_colorPool.Count)

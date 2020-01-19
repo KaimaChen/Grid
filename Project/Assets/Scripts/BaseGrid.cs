@@ -20,6 +20,7 @@ public class BaseGrid : MonoBehaviour {
     {
         GL.PushMatrix();
         GL.LoadOrtho();
+        m_mat.SetPass(0);
 
         Draw();
         
@@ -28,8 +29,6 @@ public class BaseGrid : MonoBehaviour {
     
     protected virtual void Draw()
     {
-        m_mat.SetPass(0);
-
         GL.Begin(GL.QUADS);
         GL.Color(c_gridColor);
 
@@ -40,30 +39,24 @@ public class BaseGrid : MonoBehaviour {
 
     void DrawGrid()
     {
-        float w = TileWidth;
-        float vw = VisualWidth;
-        float h = TileHeight;
-        float vh = VisualHeight;
-
-        for(int x = 0; x < m_widthCount; x++)
-        {
-            for(int y = 0; y < m_heightCount; y++)
-            {
-                Vector2 pos = new Vector2(x * w, y * h);
-                Vector2 size = new Vector2(vw, vh);
-                DrawQuad(pos, size);
-            }
-        }
+        for (int x = 0; x < m_widthCount; x++)
+            for (int y = 0; y < m_heightCount; y++)
+                DrawQuad(x, y);
     }
 
     protected void DrawQuad(Vector2Int tilePos)
     {
-        Vector2 pos = new Vector2(tilePos.x * TileWidth, tilePos.y * TileHeight);
-        Vector2 size = new Vector2(TileWidth * 0.9f, TileHeight * 0.9f);
-        DrawQuad(pos, size);
+        DrawQuad(tilePos.x, tilePos.y);
     }
 
-    protected static void DrawQuad(Vector2 pos, Vector2 size)
+    protected void DrawQuad(int tx, int ty)
+    {
+        Vector2 pos = new Vector2(tx * TileWidth, ty * TileHeight);
+        Vector2 size = new Vector2(VisualWidth, VisualHeight);
+        DrawQuadImpl(pos, size);
+    }
+
+    protected static void DrawQuadImpl(Vector2 pos, Vector2 size)
     {
         GL.Vertex3(pos.x, pos.y, 0);
         GL.Vertex3(pos.x, pos.y + size.y, 0);
